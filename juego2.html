@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Desafío de Cálculo Mental de Hipatia!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+        .game-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+            width: 100%;
+            max-width: 480px;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid #fff;
+        }
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            color: #6c5ce7;
+            font-size: 26px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px #a29bfe;
+        }
+        
+        /* Stats Header */
+        .header-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f1f2f6;
+            padding: 12px 18px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        .stat-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 18px;
+            color: #2f3542;
+        }
+        .timer-box {
+            color: #ff4757;
+            font-family: 'Fredoka One', cursive;
+            font-size: 20px;
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 14px;
+            background-color: #ffeaa7;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #00b894;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        /* Problem Box */
+        .problem-card {
+            background: #a29bfe;
+            color: white;
+            padding: 25px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 -6px 0 rgba(0,0,0,0.15);
+            position: relative;
+        }
+        .problem-text {
+            font-family: 'Fredoka One', cursive;
+            font-size: 54px;
+            letter-spacing: 2px;
+        }
+
+        /* Input Area */
+        .answer-display {
+            background: #ffffff;
+            border: 4px dashed #a29bfe;
+            border-radius: 20px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 40px;
+            color: #2f3542;
+            height: 65px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .answer-display.correct {
+            border-color: #00b894;
+            color: #00b894;
+            background: #e8fae8;
+        }
+        .answer-display.wrong {
+            border-color: #ff4757;
+            color: #ff4757;
+            background: #ffe0e3;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        /* Keypad */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .key-btn {
+            background: #ffffff;
+            border: none;
+            border-bottom: 5px solid #ced6e0;
+            border-radius: 18px;
+            padding: 16px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 26px;
+            color: #6c5ce7;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .key-btn:active {
+            transform: translateY(4px);
+            border-bottom-width: 1px;
+        }
+        .key-btn.clear {
+            background: #ff7f50;
+            color: white;
+            border-bottom-color: #e056fd;
+        }
+        .key-btn.submit {
+            background: #00b894;
+            color: white;
+            border-bottom-color: #00896f;
+            grid-column: span 2;
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+        }
+        .screen.active {
+            display: block;
+        }
+
+        /* Start / Finish Screens */
+        .btn-start {
+            background: #6c5ce7;
+            color: white;
+            font-family: 'Fredoka One', cursive;
+            font-size: 28px;
+            padding: 16px 40px;
+            border: none;
+            border-radius: 50px;
+            border-bottom: 6px solid #574b90;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.3);
+            transition: transform 0.2s;
+        }
+        .btn-start:hover {
+            transform: scale(1.05);
+        }
+
+        .trophy-img {
+            font-size: 80px;
+            margin: 15px 0;
+            animation: bounce 1.5s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-15px); }
+        }
+        
+        .result-detail {
+            font-size: 20px;
+            color: #57606f;
+            margin: 10px 0 20px;
+            line-height: 1.5;
+        }
+        .star-rating {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-card">
+
+    <!-- START SCREEN -->
+    <div id="start-screen" class="screen active">
+        <div class="trophy-img">🏛️✨⭐</div>
+        <h1>¡Desafío Hipatia!</h1>
+        <p style="font-size: 18px; color: #57606f; margin: 15px 0;">
+            ¿Lista para demostrar tu velocidad en cálculo mental?<br>
+            <strong>Responde 48 operaciones en 2 minutos.</strong>
+        </p>
+        <button class="btn-start" onclick="startGame()">¡JUGAR YA!</button>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game-screen" class="screen">
+        <div class="header-stats">
+            <div class="stat-box">
+                🎯 <span id="current-count">1</span>/48
+            </div>
+            <div class="stat-box timer-box">
+                ⏱️ <span id="timer-text">02:00</span>
+            </div>
+            <div class="stat-box" style="color: #00b894;">
+                ⭐ <span id="score-text">0</span>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+
+        <div class="problem-card">
+            <div id="problem-text" class="problem-text">1 + 8 = ?</div>
+        </div>
+
+        <div id="answer-display" class="answer-display"></div>
+
+        <div class="keypad">
+            <button class="key-btn" onclick="pressKey('1')">1</button>
+            <button class="key-btn" onclick="pressKey('2')">2</button>
+            <button class="key-btn" onclick="pressKey('3')">3</button>
+            <button class="key-btn" onclick="pressKey('4')">4</button>
+            <button class="key-btn" onclick="pressKey('5')">5</button>
+            <button class="key-btn" onclick="pressKey('6')">6</button>
+            <button class="key-btn" onclick="pressKey('7')">7</button>
+            <button class="key-btn" onclick="pressKey('8')">8</button>
+            <button class="key-btn" onclick="pressKey('9')">9</button>
+            <button class="key-btn clear" onclick="pressKey('C')">⌫</button>
+            <button class="key-btn" onclick="pressKey('0')">0</button>
+            <button class="key-btn submit" onclick="checkAnswer()">¡LISTO!</button>
+        </div>
+    </div>
+
+    <!-- END SCREEN -->
+    <div id="end-screen" class="screen">
+        <div id="final-emoji" class="trophy-img">🏆</div>
+        <h1 id="final-title">¡Excelente Trabajo!</h1>
+        <div id="star-rating" class="star-rating">⭐⭐⭐</div>
+        <div class="result-detail" id="result-detail">
+            Lograste completar XX operaciones de 48 en 2 minutos.
+        </div>
+        <button class="btn-start" onclick="startGame()">¡JUGAR DE NUEVO!</button>
+    </div>
+
+</div>
+
+<script>
+    // All 99 Math operations from the Hipatia guide
+    const fullDataset = [
+        { q: "1 + 8", a: 9 }, { q: "3 + 4", a: 7 }, { q: "2 + 5", a: 7 }, { q: "1 + 7", a: 8 }, { q: "8 - 7", a: 1 }, { q: "8 + 9", a: 17 }, { q: "7 + 4", a: 11 }, { q: "7 - 3", a: 4 }, { q: "9 + 4", a: 13 },
+        { q: "6 + 8", a: 14 }, { q: "9 - 5", a: 4 }, { q: "8 + 2", a: 10 }, { q: "2 + 8", a: 10 }, { q: "2 + 7", a: 9 }, { q: "7 - 5", a: 2 }, { q: "2 + 6", a: 8 }, { q: "9 - 4", a: 5 }, { q: "8 - 3", a: 5 },
+        { q: "6 + 7", a: 13 }, { q: "8 + 7", a: 15 }, { q: "4 + 9", a: 13 }, { q: "3 + 6", a: 9 }, { q: "8 - 6", a: 2 }, { q: "8 - 5", a: 3 }, { q: "9 - 2", a: 7 }, { q: "8 + 3", a: 11 }, { q: "8 - 4", a: 4 },
+        { q: "5 + 2", a: 7 }, { q: "9 + 9", a: 18 }, { q: "3 + 5", a: 8 }, { q: "3 + 7", a: 10 }, { q: "7 + 5", a: 12 }, { q: "7 + 2", a: 9 }, { q: "7 - 1", a: 6 }, { q: "7 + 8", a: 15 }, { q: "4 + 4", a: 8 },
+        { q: "4 + 7", a: 11 }, { q: "8 - 0", a: 8 }, { q: "5 + 3", a: 8 }, { q: "5 + 9", a: 14 }, { q: "9 + 1", a: 10 }, { q: "4 + 8", a: 12 }, { q: "7 + 1", a: 8 }, { q: "2 + 9", a: 11 }, { q: "9 - 3", a: 6 },
+        { q: "6 + 9", a: 15 }, { q: "5 + 8", a: 13 }, { q: "9 + 2", a: 11 }, { q: "6 + 2", a: 8 }, { q: "7 + 7", a: 14 }, { q: "4 + 6", a: 10 }, { q: "8 - 8", a: 0 }, { q: "8 + 5", a: 13 }, { q: "0 + 9", a: 9 },
+        { q: "9 - 0", a: 9 }, { q: "7 + 6", a: 13 }, { q: "0 + 8", a: 8 }, { q: "6 + 5", a: 11 }, { q: "8 + 4", a: 12 }, { q: "9 + 0", a: 9 }, { q: "3 + 8", a: 11 }, { q: "7 - 0", a: 7 }, { q: "7 + 3", a: 10 },
+        { q: "8 + 1", a: 9 }, { q: "9 - 7", a: 2 }, { q: "6 + 4", a: 10 }, { q: "7 - 4", a: 3 }, { q: "7 - 2", a: 5 }, { q: "7 + 9", a: 16 }, { q: "5 + 7", a: 12 }, { q: "5 + 4", a: 9 }, { q: "7 - 6", a: 1 },
+        { q: "4 + 5", a: 9 }, { q: "9 - 6", a: 3 }, { q: "0 + 7", a: 7 }, { q: "8 - 2", a: 6 }, { q: "9 + 7", a: 16 }, { q: "5 + 6", a: 11 }, { q: "1 + 9", a: 10 }, { q: "8 - 1", a: 7 }, { q: "9 - 8", a: 1 },
+        { q: "9 + 6", a: 15 }, { q: "8 + 6", a: 14 }, { q: "7 + 0", a: 7 }, { q: "9 + 5", a: 14 }, { q: "9 - 1", a: 8 }, { q: "3 + 9", a: 12 }, { q: "6 + 6", a: 12 }, { q: "5 + 5", a: 10 }, { q: "8 + 0", a: 8 },
+        { q: "4 + 3", a: 7 }, { q: "9 + 3", a: 12 }, { q: "6 + 3", a: 9 }, { q: "9 + 8", a: 17 }, { q: "8 + 8", a: 16 }, { q: "9 - 9", a: 0 }, { q: "6 + 1", a: 7 }, { q: "7 - 7", a: 0 }, { q: "1 + 6", a: 7 }
+    ];
+
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let userInput = "";
+    let timeLeft = 120;
+    let timerInterval = null;
+    let audioCtx = null;
+
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    function playSound(type) {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'correct') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+            osc.start(now);
+            osc.stop(now + 0.25);
+        } else if (type === 'wrong') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.setValueAtTime(164.81, now + 0.1);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+            osc.start(now);
+            osc.stop(now + 0.25);
+        } else if (type === 'finish') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.setValueAtTime(554.37, now + 0.1);
+            osc.frequency.setValueAtTime(659.25, now + 0.2);
+            osc.frequency.setValueAtTime(880, now + 0.3);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            osc.start(now);
+            osc.stop(now + 0.5);
+        }
+    }
+
+    function startGame() {
+        initAudio();
+        currentQuestions = [...fullDataset].sort(() => 0.5 - Math.random()).slice(0, 48);
+        currentIndex = 0;
+        score = 0;
+        userInput = "";
+        timeLeft = 120;
+
+        showScreen('game-screen');
+        updateHeader();
+        loadQuestion();
+
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function updateTimer() {
+        timeLeft--;
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        document.getElementById('timer-text').textContent = 
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+            endGame();
+        }
+    }
+
+    function updateHeader() {
+        document.getElementById('current-count').textContent = currentIndex + 1;
+        document.getElementById('score-text').textContent = score;
+        const progressPercent = ((currentIndex) / 48) * 100;
+        document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+    }
+
+    function loadQuestion() {
+        if (currentIndex >= 48) {
+            endGame();
+            return;
+        }
+        userInput = "";
+        updateDisplay();
+        const q = currentQuestions[currentIndex];
+        document.getElementById('problem-text').textContent = `${q.q} = ?`;
+        updateHeader();
+    }
+
+    function pressKey(key) {
+        initAudio();
+        if (key === 'C') {
+            userInput = userInput.slice(0, -1);
+        } else if (userInput.length < 3) {
+            userInput += key;
+        }
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        const display = document.getElementById('answer-display');
+        display.textContent = userInput;
+        display.className = 'answer-display';
+    }
+
+    function checkAnswer() {
+        if (userInput === "") return;
+
+        const currentAns = currentQuestions[currentIndex].a;
+        const userAns = parseInt(userInput, 10);
+        const display = document.getElementById('answer-display');
+
+        if (userAns === currentAns) {
+            playSound('correct');
+            display.classList.add('correct');
+            score++;
+            setTimeout(() => {
+                currentIndex++;
+                loadQuestion();
+            }, 300);
+        } else {
+            playSound('wrong');
+            display.classList.add('wrong');
+            setTimeout(() => {
+                userInput = "";
+                updateDisplay();
+            }, 500);
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (document.getElementById('game-screen').classList.contains('active')) {
+            if (e.key >= '0' && e.key <= '9') {
+                pressKey(e.key);
+            } else if (e.key === 'Backspace') {
+                pressKey('C');
+            } else if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        }
+    });
+
+    function endGame() {
+        clearInterval(timerInterval);
+        playSound('finish');
+        showScreen('end-screen');
+
+        const resultDetail = document.getElementById('result-detail');
+        const starRating = document.getElementById('star-rating');
+        const finalTitle = document.getElementById('final-title');
+        const finalEmoji = document.getElementById('final-emoji');
+
+        resultDetail.innerHTML = `Completaste <strong>${score}</strong> de <strong>48</strong> ejercicios en 2 minutos.`;
+
+        if (score >= 40) {
+            finalTitle.textContent = "¡Eres un/a Super Campeón/a!";
+            starRating.textContent = "⭐⭐⭐";
+            finalEmoji.textContent = "🏆";
+        } else if (score >= 25) {
+            finalTitle.textContent = "¡Muy Buen Trabajo!";
+            starRating.textContent = "⭐⭐";
+            finalEmoji.textContent = "🎉";
+        } else {
+            finalTitle.textContent = "¡Buen Intento! ¡Sigue Practicando!";
+            starRating.textContent = "⭐";
+            finalEmoji.textContent = "💪";
+        }
+    }
+</script>
+
+</body>
+</html>
